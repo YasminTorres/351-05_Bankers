@@ -1,0 +1,229 @@
+import java.util.Scanner;
+
+
+public class Bank {
+	int numOfCustomer;
+	int numOfRe = 3;
+	
+	private int need[][], allocate[][],max[][],avail[][];
+	
+	public void addCustomer() //adding customers basically stating program
+	{
+		Scanner sc=new Scanner(System.in);
+		System.out.print("Enter no. of customer");
+		numOfCustomer = sc.nextInt();
+		need = new int [numOfCustomer][numOfRe];
+		max = new int [numOfCustomer][numOfRe];
+		allocate = new int [numOfCustomer][numOfRe];
+		avail = new int [1][numOfRe];
+		
+		
+		for(int i=0;i<numOfCustomer;i++)
+		{
+			System.out.println("Enter allocated array for customer " + i + ": ");
+			for(int j=0;j<numOfRe;j++)
+				allocate[i][j] = sc.nextInt();
+		}
+		
+		
+		for(int i=0;i<numOfCustomer;i++)
+		{
+			System.out.println("Enter max array for customer " + i + ": ");
+			for(int j=0;j<numOfRe;j++)
+				max[i][j] = sc.nextInt();
+		}
+		
+		for(int i=0;i<numOfCustomer;i++)
+		{
+			for(int j=0;j<numOfRe;j++)
+			{
+				int a;
+				a = max[i][j] - allocate[i][j];
+				 if(a < 0)
+				 {
+					 need[i][j] = 0;
+				 }
+				 else
+				 {
+					 need[i][j] = a;
+				 }
+			}
+				
+		}
+		
+		System.out.println("Enter available matrix -->");
+		for(int j=0;j<numOfRe;j++)
+			avail[0][j] = sc.nextInt();
+		for(int  i =0; i<numOfCustomer; i++)
+		{
+			System.out.println("adding customer " + i +"...");
+		}
+		print();
+		sc.close();
+	}
+	
+	public void print() //printing  matrix
+	{
+		System.out.print("Available : ");
+		for(int j=0;j<numOfRe;j++)
+		{
+			System.out.print(avail[0][j] + " ");
+		}
+		System.out.println("  ");
+		System.out.println("ALLOCATED       MAXIMUM        NEED");
+		for (int i = 0; i<numOfCustomer; i ++)
+		{ 
+			for (int j =0; j<numOfRe; j++)
+			{
+				System.out.print(allocate[i][j] + " ");
+			}
+			System.out.print("          ");
+			for (int j =0; j<numOfRe; j++)
+			{
+				System.out.print(max[i][j] + " ");
+			}
+			System.out.print("        ");
+			for (int j =0; j<numOfRe; j++)
+			{
+				System.out.print(need[i][j]+ " ");
+			}
+			System.out.println("  ");
+		}
+		
+		ask();
+	}
+	public void request() //user requesting
+	{
+		int requestingCust;
+		int request1;
+		int request2; 
+		int request3;
+		
+		Scanner input=new Scanner(System.in);
+		System.out.println("Enter <customer number> <resource #1> <#2> <#3>");
+		requestingCust = input.nextInt();
+		request1 = input.nextInt();
+		request2 = input.nextInt();
+		request3 = input.nextInt();
+
+		System.out.println("requesting resources: [" + request1 +" "+ request2 +" "+ request3 + "] for customer: " +requestingCust + "...");
+		check(requestingCust, request1, request2, request3);
+		input.close();
+	}
+	
+	public void check(int customer, int r1, int r2, int r3) //deny request
+	{
+		if(r1 > avail[0][0] || r2 > avail[0][1] || r3> avail[0][2] || r1 > max[customer][0] || r2 > max[customer][1] || r3> max[customer][2])
+		{
+			System.out.println("Customer #" + customer +" RQ:[" + r1 + " " + r2 + " " + r3 + "],"
+					+ " needs: [" +  need[customer][0] +" "+ need[customer][1] +" "+ need[customer][2] + "],"
+							+ " available: [" + avail[0][0] +" "+ avail[0][1] +" "+ avail[0][2] + "] DENIED" );
+			System.out.println("...request DENIED");
+			ask();
+			
+		}
+		else if(r1 < avail[0][0] && r2 < avail[0][1] && r3 < avail[0][2] ) //approve request
+		{
+			allocate[customer][0] =allocate[customer][0]+ r1;
+			allocate[customer][1] =allocate[customer][1]+ r2;
+			allocate[customer][2] =allocate[customer][2]+ r3;
+			
+			System.out.println("Customer #" + customer +" RQ:[" + r1 + " " + r2 + " " + r3 + "],"
+					+ " needs: [" +  need[customer][0] +" " + need[customer][1] +" " + need[customer][2] + "],"
+							+ " available: [" + avail[0][0] +" "+ avail[0][1] + " " + avail[0][2] + "] ----> APPROVED," );
+			System.out.println("Customer # " + customer + " now at: [" + (allocate[customer][0]) 
+					+ " " + (allocate[customer][1]) + " " +(allocate[customer][2]) +"]");
+			
+			need[customer][0] =need[customer][0]- r1;
+			need[customer][1] =need[customer][1]- r2;
+			need[customer][2] =need[customer][2]- r3;
+			
+			avail[0][0] = avail[0][0] - r1;
+			avail[0][1] = avail[0][1] - r2;
+			avail[0][2] = avail[0][2] - r3;
+			zero(customer);
+			print();
+			
+			
+		}
+	}
+	
+	public void zero(int cust) { //releasing resources, customer "dying"
+		if(need[cust][0] == 0 && need[cust][1] == 0 && need[cust][2] == 0) 
+		{
+			avail[0][0] = avail[0][0] + allocate[cust][0];
+			avail[0][1] = avail[0][1] + allocate[cust][1];
+			avail[0][2] = avail[0][2] + allocate[cust][2];
+			
+			allocate[cust][0] = 0;
+			allocate[cust][1] = 0;
+			allocate[cust][2] = 0;
+			max[cust][0] = 0;
+			max[cust][1] = 0;
+			max[cust][2] = 0;
+			
+			System.out.println("Customer #" + cust 
+					+" has all its resources! RELEASING ALL and Customer is leaving...");
+
+		}
+		
+	}
+	
+	private boolean isDone() { //check if customer has all resources needed
+		int done =0 ;
+		for( int i=0; i<numOfCustomer; i++) {
+			
+			if(need[i][0] == 0 && need[i][1] == 0 && need[i][2] == 0)
+			{
+				done = done+ 1;	
+			}
+		}
+		if( done == numOfCustomer) {
+			return true;
+		}
+		else 
+			return false;
+	}
+	public void ask() { //user input 
+	
+		if(isDone() == false) {
+		int input;
+		Scanner ask = new Scanner(System.in);
+		
+		System.out.print("Enter 0 to get state of system, OR enter 1 to request resurces: ");
+		input = ask.nextInt();
+		
+		if(input == 0) //state of system
+		{
+			System.out.println(" ");
+			print();
+		}
+		
+		else if(input == 1) //request resources
+		{
+			System.out.println(" ");
+			request();
+		}
+
+		ask.close();
+		
+		}
+		else if (isDone() == true) //check when all customers are helped
+		{
+			int finish;
+			Scanner option= new Scanner(System.in);
+			System.out.println("ALL CUSTOMERS HELPED");
+			System.out.println("press 0 to exit: ");
+			finish = option.nextInt();
+			
+			if(finish == 0){
+				System.exit(0);
+			}
+		}
+		
+	}
+	 public static void main(String[] args) { //main
+	       Bank a = new Bank();
+	       a.addCustomer();
+	    }
+}
